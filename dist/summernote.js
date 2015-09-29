@@ -6,7 +6,7 @@
  * Copyright 2013-2015 Alan Hong. and other contributors
  * summernote may be freely distributed under the MIT license./
  *
- * Date: 2015-08-03T16:41Z
+ * Date: 2015-09-29T13:14Z
  */
 (function (factory) {
   /* global define */
@@ -2592,6 +2592,13 @@
 
       // image
       maximumImageFileSize: null, // size in bytes, null = no limit
+
+      // link
+      link: {
+        defaultUrl: 'http://',
+        focusUrl: true,
+        selectUrl: true
+      },
 
       // callbacks
       oninit: null,             // initialize
@@ -5236,7 +5243,7 @@
      * @param {Object} linkInfo
      * @return {Promise}
      */
-    this.showLinkDialog = function ($editable, $dialog, linkInfo) {
+    this.showLinkDialog = function ($editable, $dialog, linkInfo, options) {
       return $.Deferred(function (deferred) {
         var $linkDialog = $dialog.find('.note-link-dialog');
 
@@ -5257,7 +5264,8 @@
 
           // if no url was given, copy text to url
           if (!linkInfo.url) {
-            linkInfo.url = linkInfo.text || 'http://';
+            var defaultUrl = options.link.defaultUrl;
+            linkInfo.url = defaultUrl ? defaultUrl : linkInfo.text || 'http://';
             toggleBtn($linkBtn, linkInfo.text);
           }
 
@@ -5268,7 +5276,15 @@
             if (!linkInfo.text) {
               $linkText.val($linkUrl.val());
             }
-          }).val(linkInfo.url).trigger('focus').trigger('select');
+          }).val(linkInfo.url);
+
+          if (options.link.focusUrl) {
+            $linkUrl.trigger('focus');
+          }
+
+          if (options.link.selectUrl) {
+            $linkUrl.trigger('select');
+          }
 
           bindEnterKey($linkUrl, $linkBtn);
           bindEnterKey($linkText, $linkBtn);
@@ -5312,7 +5328,7 @@
       var options = $editor.data('options');
 
       handler.invoke('editor.saveRange', $editable);
-      this.showLinkDialog($editable, $dialog, linkInfo).then(function (linkInfo) {
+      this.showLinkDialog($editable, $dialog, linkInfo, options).then(function (linkInfo) {
         handler.invoke('editor.restoreRange', $editable);
         handler.invoke('editor.createLink', $editable, linkInfo, options);
         // hide popover after creating link

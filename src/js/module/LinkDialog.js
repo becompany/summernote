@@ -38,7 +38,7 @@ define([
      * @param {Object} linkInfo
      * @return {Promise}
      */
-    this.showLinkDialog = function ($editable, $dialog, linkInfo) {
+    this.showLinkDialog = function ($editable, $dialog, linkInfo, options) {
       return $.Deferred(function (deferred) {
         var $linkDialog = $dialog.find('.note-link-dialog');
 
@@ -59,7 +59,8 @@ define([
 
           // if no url was given, copy text to url
           if (!linkInfo.url) {
-            linkInfo.url = linkInfo.text || 'http://';
+            var defaultUrl = options.link.defaultUrl;
+            linkInfo.url = defaultUrl ? defaultUrl : linkInfo.text || 'http://';
             toggleBtn($linkBtn, linkInfo.text);
           }
 
@@ -70,7 +71,15 @@ define([
             if (!linkInfo.text) {
               $linkText.val($linkUrl.val());
             }
-          }).val(linkInfo.url).trigger('focus').trigger('select');
+          }).val(linkInfo.url);
+
+          if (options.link.focusUrl) {
+            $linkUrl.trigger('focus');
+          }
+
+          if (options.link.selectUrl) {
+            $linkUrl.trigger('select');
+          }
 
           bindEnterKey($linkUrl, $linkBtn);
           bindEnterKey($linkText, $linkBtn);
@@ -114,7 +123,7 @@ define([
       var options = $editor.data('options');
 
       handler.invoke('editor.saveRange', $editable);
-      this.showLinkDialog($editable, $dialog, linkInfo).then(function (linkInfo) {
+      this.showLinkDialog($editable, $dialog, linkInfo, options).then(function (linkInfo) {
         handler.invoke('editor.restoreRange', $editable);
         handler.invoke('editor.createLink', $editable, linkInfo, options);
         // hide popover after creating link

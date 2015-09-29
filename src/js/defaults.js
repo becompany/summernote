@@ -215,6 +215,13 @@ define('summernote/defaults', function () {
       // image
       maximumImageFileSize: null, // size in bytes, null = no limit
 
+      // link
+      link: {
+        defaultUrl: 'http://',
+        focusUrl: true,
+        selectUrl: true
+      },
+
       // callbacks
       oninit: null,             // initialize
       onfocus: null,            // editable has focus
