@@ -6,7 +6,7 @@
  * Copyright 2013-2015 Alan Hong. and other contributors
  * summernote may be freely distributed under the MIT license./
  *
- * Date: 2015-09-29T09:03Z
+ * Date: 2015-09-29T10:49Z
  */
 (function (factory) {
   /* global define */
@@ -5181,23 +5181,24 @@
     var $editor = summernote.layoutInfo.editor;
     var options = summernote.options;
     var lang = options.langInfo;
+    var defaultUrl = options.link.defaultUrl || 'http://';
 
     this.initialize = function () {
       var $container = options.dialogsInBody ? $(document.body) : $editor;
 
       var body = '<div class="form-group">' +
-                   '<label>' + lang.link.textToDisplay + '</label>' +
-                   '<input class="note-link-text form-control" type="text" />' +
-                 '</div>' +
-                 '<div class="form-group">' +
-                   '<label>' + lang.link.url + '</label>' +
-                   '<input class="note-link-url form-control" type="text" value="http://" />' +
-                 '</div>' +
-                 (!options.disableLinkTarget ?
-                   '<div class="checkbox">' +
-                     '<label>' + '<input type="checkbox" checked> ' + lang.link.openInNewWindow + '</label>' +
-                   '</div>' : ''
-                 );
+        '<label>' + lang.link.textToDisplay + '</label>' +
+        '<input class="note-link-text form-control" type="text" />' +
+        '</div>' +
+        '<div class="form-group">' +
+        '<label>' + lang.link.url + '</label>' +
+        '<input class="note-link-url form-control" type="text" value="' + defaultUrl + '" />' +
+        '</div>' +
+        (!options.disableLinkTarget ?
+          '<div class="checkbox">' +
+          '<label>' + '<input type="checkbox" checked> ' + lang.link.openInNewWindow + '</label>' +
+          '</div>' : ''
+        );
       var footer = '<button href="#" class="btn btn-primary note-link-btn disabled" disabled>' + lang.link.insert + '</button>';
 
       this.$dialog = ui.dialog({
@@ -5225,9 +5226,9 @@
     this.showLinkDialog = function (linkInfo) {
       return $.Deferred(function (deferred) {
         var $linkText = self.$dialog.find('.note-link-text'),
-        $linkUrl = self.$dialog.find('.note-link-url'),
-        $linkBtn = self.$dialog.find('.note-link-btn'),
-        $openInNewWindow = self.$dialog.find('input[type=checkbox]');
+          $linkUrl = self.$dialog.find('.note-link-url'),
+          $linkBtn = self.$dialog.find('.note-link-btn'),
+          $openInNewWindow = self.$dialog.find('input[type=checkbox]');
 
         ui.onDialogShown(self.$dialog, function () {
           $linkText.val(linkInfo.text);
@@ -5241,7 +5242,7 @@
 
           // if no url was given, copy text to url
           if (!linkInfo.url) {
-            linkInfo.url = linkInfo.text || 'http://';
+            linkInfo.url = options.link.defaultUrl ? defaultUrl : linkInfo.text || defaultUrl;
             ui.toggleBtn($linkBtn, linkInfo.text);
           }
 
@@ -5252,7 +5253,11 @@
             if (!linkInfo.text) {
               $linkText.val($linkUrl.val());
             }
-          }).val(linkInfo.url).trigger('focus');
+          }).val(linkInfo.url);
+
+          if (options.link.focusUrl) {
+            $linkUrl.trigger('focus');
+          }
 
           self.bindEnterKey($linkUrl, $linkBtn);
           self.bindEnterKey($linkText, $linkBtn);
@@ -5921,6 +5926,10 @@
           'CMD+ENTER': 'insertHorizontalRule',
           'CMD+K': 'linkDialog.show'
         }
+      },
+      link: {
+        defaultUrl: null,
+        focusUrl: true
       }
     }
   });

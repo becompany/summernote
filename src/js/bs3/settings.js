@@ -308,6 +308,10 @@ define([
           'CMD+ENTER': 'insertHorizontalRule',
           'CMD+K': 'linkDialog.show'
         }
+      },
+      link: {
+        defaultUrl: null,
+        focusUrl: true
       }
     }
   });

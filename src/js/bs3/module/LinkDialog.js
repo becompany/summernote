@@ -8,23 +8,24 @@ define([
     var $editor = summernote.layoutInfo.editor;
     var options = summernote.options;
     var lang = options.langInfo;
+    var defaultUrl = options.link.defaultUrl || 'http://';
 
     this.initialize = function () {
       var $container = options.dialogsInBody ? $(document.body) : $editor;
 
       var body = '<div class="form-group">' +
-                   '<label>' + lang.link.textToDisplay + '</label>' +
-                   '<input class="note-link-text form-control" type="text" />' +
-                 '</div>' +
-                 '<div class="form-group">' +
-                   '<label>' + lang.link.url + '</label>' +
-                   '<input class="note-link-url form-control" type="text" value="http://" />' +
-                 '</div>' +
-                 (!options.disableLinkTarget ?
-                   '<div class="checkbox">' +
-                     '<label>' + '<input type="checkbox" checked> ' + lang.link.openInNewWindow + '</label>' +
-                   '</div>' : ''
-                 );
+        '<label>' + lang.link.textToDisplay + '</label>' +
+        '<input class="note-link-text form-control" type="text" />' +
+        '</div>' +
+        '<div class="form-group">' +
+        '<label>' + lang.link.url + '</label>' +
+        '<input class="note-link-url form-control" type="text" value="' + defaultUrl + '" />' +
+        '</div>' +
+        (!options.disableLinkTarget ?
+          '<div class="checkbox">' +
+          '<label>' + '<input type="checkbox" checked> ' + lang.link.openInNewWindow + '</label>' +
+          '</div>' : ''
+        );
       var footer = '<button href="#" class="btn btn-primary note-link-btn disabled" disabled>' + lang.link.insert + '</button>';
 
       this.$dialog = ui.dialog({
@@ -52,9 +53,9 @@ define([
     this.showLinkDialog = function (linkInfo) {
       return $.Deferred(function (deferred) {
         var $linkText = self.$dialog.find('.note-link-text'),
-        $linkUrl = self.$dialog.find('.note-link-url'),
-        $linkBtn = self.$dialog.find('.note-link-btn'),
-        $openInNewWindow = self.$dialog.find('input[type=checkbox]');
+          $linkUrl = self.$dialog.find('.note-link-url'),
+          $linkBtn = self.$dialog.find('.note-link-btn'),
+          $openInNewWindow = self.$dialog.find('input[type=checkbox]');
 
         ui.onDialogShown(self.$dialog, function () {
           $linkText.val(linkInfo.text);
@@ -68,7 +69,7 @@ define([
 
           // if no url was given, copy text to url
           if (!linkInfo.url) {
-            linkInfo.url = linkInfo.text || 'http://';
+            linkInfo.url = options.link.defaultUrl ? defaultUrl : linkInfo.text || defaultUrl;
             ui.toggleBtn($linkBtn, linkInfo.text);
           }
 
@@ -79,7 +80,11 @@ define([
             if (!linkInfo.text) {
               $linkText.val($linkUrl.val());
             }
-          }).val(linkInfo.url).trigger('focus');
+          }).val(linkInfo.url);
+
+          if (options.link.focusUrl) {
+            $linkUrl.trigger('focus');
+          }
 
           self.bindEnterKey($linkUrl, $linkBtn);
           self.bindEnterKey($linkText, $linkBtn);
